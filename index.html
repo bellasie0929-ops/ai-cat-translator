@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>到底在說什麼啦！AI 貓咪心聲翻譯機｜加權分析版</title>
+<style>
+:root{
+  --bg:#f7f0e6;--paper:#fffaf4;--card:#fffdf9;--ink:#4d4036;--muted:#8a7c70;
+  --accent:#bf7b43;--green:#879c88;--line:#e7dacb;--shadow:0 18px 50px rgba(79,60,46,.10);
+  --radius:28px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:"Microsoft JhengHei","PingFang TC",system-ui,sans-serif;color:var(--ink)}
+body{background:radial-gradient(circle at 10% 4%,#fff 0,transparent 26%),var(--bg)}
+body.intro-lock{overflow:hidden}
+.wrap{max-width:1460px;margin:auto;padding:28px}
+header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:20px}
+h1{font-size:clamp(34px,5vw,64px);margin:0;font-weight:900;letter-spacing:-2px}
+.brand p{margin:6px 0 0;color:var(--muted)}
+.mode{padding:11px 16px;border:1px solid #ead8c6;background:#fff7ec;border-radius:999px;font-weight:900;white-space:nowrap}
+.shell{display:grid;grid-template-columns:1.05fr 0.95fr;gap:24px;padding:22px;background:rgba(255,255,255,.45);border-radius:36px;box-shadow:var(--shadow)}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.panel h2{margin:0 0 6px;font-size:28px}.sub{margin:0 0 18px;color:var(--muted)}
+.camera{aspect-ratio:4/3;background:#332d29;border-radius:24px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
+.camera img{width:100%;height:100%;object-fit:contain;display:none}
+.placeholder{text-align:center;color:#e8ded5}.placeholder .cat{font-size:82px;display:block}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+button,.upload{border:0;border-radius:15px;padding:13px 16px;font:inherit;font-weight:900;cursor:pointer;transition:.15s;display:flex;justify-content:center;align-items:center;gap:7px}
+button:hover,.upload:hover{transform:translateY(-1px)}
+.primary{background:var(--accent);color:white}.soft{background:#efe4d8;color:var(--ink)}.green{background:var(--green);color:white}
+input[type=file]{display:none}
+.section-title{font-weight:900;margin:20px 0 10px}
+.section-note{font-size:12px;color:#8f7f72;line-height:1.55;margin-top:4px}
+.feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.feature{padding:10px 12px;border-radius:16px;background:white;border:1px solid #dccdbf;text-align:left;font-size:13px;line-height:1.35;min-height:62px}
+.feature small{display:block;color:#8d7f72;font-size:11px;margin-top:4px}
+.feature.active{background:#6f806f;color:white;border-color:#6f806f}
+.feature.active small{color:#eef6ee}
+.contexts{display:flex;flex-wrap:wrap;gap:8px}
+.context{padding:8px 11px;border-radius:999px;background:white;border:1px solid #dccdbf;font-size:13px}
+.context.active{background:#bf7b43;color:white;border-color:#bf7b43}
+textarea{width:100%;min-height:72px;margin-top:10px;padding:12px;border-radius:15px;border:1px solid #ded0c3;font:inherit;resize:vertical}
+.analyze{width:100%;margin-top:14px;font-size:17px}
+.demo-note{font-size:12px;color:#907f71;line-height:1.55;margin-top:10px}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.legend .item{padding:10px 12px;border-radius:15px;background:#fff;border:1px dashed #dccdbf;font-size:12px}
+.empty{min-height:660px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#85766b}
+.empty .big{font-size:78px}.empty strong{font-size:24px;color:var(--ink)}
+.loader{display:none;padding:26px 10px}.step{padding:11px 0;font-weight:900;opacity:.35}.step.on{opacity:1}
+.results{display:none;flex-direction:column;gap:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:21px;padding:17px}
+.mood{background:linear-gradient(135deg,#fff8ee,#f3eadf)}
+.mood-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.mood-name{font-size:30px;font-weight:900}
+.conf{font-size:12px;font-weight:900;padding:8px 10px;border:1px solid #e2d4c6;border-radius:999px;background:white}
+.bars{display:grid;gap:8px;margin-top:14px}
+.barrow{display:grid;grid-template-columns:70px 1fr 36px;gap:8px;align-items:center;font-size:12px}
+.bar{height:9px;background:#e9ddd2;border-radius:999px;overflow:hidden}.fill{height:100%;width:0;background:#96a692;border-radius:999px;transition:width .55s}
+.os{font-size:21px;line-height:1.55;font-weight:900;background:#5a4c42;color:white;border-radius:21px;padding:18px}
+.tones{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.tone{font-size:12px;background:#eee4da}.tone.active{background:var(--accent);color:white}
+.guide{background:#eef4ee;border-color:#d4dfd4}.tiny{font-size:11px;color:#89796d;line-height:1.5;margin-top:10px}
+.score-explain{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.score-explain .mini{background:#fff;border:1px solid #ebddcf;border-radius:16px;padding:12px}
+.score-explain .mini strong{display:block;font-size:13px;margin-bottom:6px}
+.score-explain .mini small{color:#8d7e71;line-height:1.55}
+#intro{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;transition:.65s}
+#intro.hide{opacity:0;visibility:hidden;pointer-events:none}
+#introVideo{width:100%;height:100%;object-fit:cover;background:#000}
+.introShade{position:absolute;inset:0;background:rgba(0,0,0,.03);pointer-events:none}
+.introHint{position:absolute;top:28px;left:20px;right:20px;text-align:center;color:white;font-weight:900;text-shadow:0 2px 9px #000}
+.introBtns{position:absolute;bottom:30px;left:0;right:0;display:flex;justify-content:center;gap:10px;padding:0 20px}
+.introBtn{color:white;background:rgba(35,28,23,.7);border:1px solid rgba(255,255,255,.4);backdrop-filter:blur(8px);border-radius:999px}
+.introBtn.main{background:rgba(191,123,67,.93)}
+@media(max-width:1120px){.feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.empty{min-height:360px}header{flex-direction:column}.wrap{padding:16px}#introVideo{object-fit:contain}.feature-grid{grid-template-columns:1fr 1fr}.score-explain{grid-template-columns:1fr}}
+@media(max-width:560px){.feature-grid{grid-template-columns:1fr}.legend{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="intro-lock">
+
+<div id="intro">
+  <video id="introVideo" playsinline preload="auto">
+    <source src="intro.mp4" type="video/mp4">
+  </video>
+  <div class="introShade"></div>
+  <div class="introHint" id="introHint">🔊 點一下播放開場動畫，看完會自動進入翻譯機</div>
+  <div class="introBtns">
+    <button class="introBtn main" id="introPlay">🔊 開啟聲音並播放</button>
+    <button class="introBtn" id="introSkip">跳過動畫 →</button>
+  </div>
+</div>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <h1>到底在說什麼啦！🐱</h1>
+    <p>AI 貓咪心聲翻譯機｜改用「貓咪肢體特徵 × 加權情緒分析」模擬情緒翻譯。</p>
+  </div>
+  <div class="mode">Rule-based · Weighted Demo</div>
+</header>
+
+<div class="shell">
+  <section class="panel">
+    <h2>📷 讓我看看主子現在在幹嘛</h2>
+    <p class="sub">先上傳照片，再由你協助標記可見特徵，系統會依特徵權重計算情緒結果。</p>
+
+    <div class="camera">
+      <img id="preview">
+      <div class="placeholder" id="placeholder"><span class="cat">🐈</span><strong>等待主子入鏡</strong><br><small>上傳照片後，再勾選牠的肢體特徵</small></div>
+    </div>
+
+    <div class="controls">
+      <label class="upload soft" for="file">🖼 上傳照片</label>
+      <button id="clear" class="soft">↺ 清除照片</button>
+      <input id="file" type="file" accept="image/*">
+    </div>
+
+    <div class="section-title">Step 1｜幫 AI 標記看得到的肢體特徵</div>
+    <div class="section-note">每個特徵都會對不同情緒加分，例如「哈氣」會大幅提高警戒與不耐煩分數。</div>
+    <div class="feature-grid" id="featureGrid"></div>
+
+    <div class="section-title">Step 2｜補充情境（選填）</div>
+    <div class="contexts" id="contextGrid"></div>
+    <textarea id="contextText" placeholder="可補充：剛剛被摸屁股、剛到新環境、看到罐頭就衝過來……"></textarea>
+
+    <div class="section-title">Step 3｜分析邏輯說明</div>
+    <div class="legend">
+      <div class="item">👂 <strong>肢體特徵</strong>：你看到什麼，就勾什麼。</div>
+      <div class="item">📊 <strong>情緒分數</strong>：系統把特徵轉成「放鬆 / 想互動 / 警戒 / 不耐煩 / 想吃」五種分數。</div>
+      <div class="item">🧠 <strong>翻譯結果</strong>：依最高分與次高分組合，推測整體狀態。</div>
+      <div class="item">💬 <strong>心聲 OS</strong>：根據情緒結果生成可愛／認真／嘴臭版台詞。</div>
+    </div>
+
+    <button id="analyze" class="green analyze">✨ 開始加權分析</button>
+    <div class="demo-note">※ 本頁為作業展示用 Demo，不會把照片上傳到任何 AI 服務。分析結果由前端規則與權重模擬。</div>
+  </section>
+
+  <section class="panel">
+    <h2>✨ AI 心聲翻譯</h2>
+    <p class="sub">不是讀心術，而是把「你標記的貓咪特徵」轉換成情緒權重，再翻成比較好懂的人話。</p>
+
+    <div id="empty" class="empty">
+      <div class="big">😼</div>
+      <strong>主子還沒開口</strong>
+      <p>左邊上傳照片並勾選肢體特徵，再按「開始加權分析」。</p>
+    </div>
+
+    <div id="loader" class="loader">
+      <div class="step" id="s1">🔍 正在讀取你標記的耳朵、眼神、嘴巴與姿勢…</div>
+      <div class="step" id="s2">⚖️ 正在套用情緒權重模型…</div>
+      <div class="step" id="s3">📊 正在計算五種情緒分數…</div>
+      <div class="step" id="s4">✨ 正在翻譯成本喵內心 OS…</div>
+    </div>
+
+    <div id="results" class="results">
+      <div class="card mood">
+        <div class="mood-top">
+          <div>
+            <div style="font-size:12px;font-weight:900;color:#8a7c70">目前可能的整體狀態</div>
+            <div class="mood-name" id="moodName"></div>
+          </div>
+          <div class="conf" id="conf"></div>
+        </div>
+        <div class="bars">
+          <div class="barrow"><span>放鬆</span><div class="bar"><div class="fill" id="b0"></div></div><span id="v0"></span></div>
+          <div class="barrow"><span>想互動</span><div class="bar"><div class="fill" id="b1"></div></div><span id="v1"></span></div>
+          <div class="barrow"><span>警戒</span><div class="bar"><div class="fill" id="b2"></div></div><span id="v2"></span></div>
+          <div class="barrow"><span>不耐煩</span><div class="bar"><div class="fill" id="b3"></div></div><span id="v3"></span></div>
+          <div class="barrow"><span>想吃</span><div class="bar"><div class="fill" id="b4"></div></div><span id="v4"></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📐 分析依據</h3>
+        <div class="score-explain">
+          <div class="mini"><strong>你勾選的特徵</strong><small id="pickedFeatures">—</small></div>
+          <div class="mini"><strong>判讀方式</strong><small id="calcExplain">系統會依每個特徵對五種情緒的加權影響進行累加，再挑出主要情緒。</small></div>
+        </div>
+      </div>
+
+      <div class="card"><h3>👀 AI 觀察到</h3><ul id="obs"></ul></div>
+      <div class="card"><h3>🧠 行為解讀</h3><div id="interp"></div></div>
+      <div>
+        <div class="os" id="os"></div>
+        <div class="tones">
+          <button class="tone active" data-tone="cute">😺 可愛版</button>
+          <button class="tone" data-tone="serious">🧐 認真版</button>
+          <button class="tone" data-tone="savage">😈 嘴臭版</button>
+        </div>
+      </div>
+      <div class="card guide"><h3>❤️ 奴才行動指南</h3><div id="guide"></div><div class="tiny">⚠️ Demo 僅供互動展示；實際貓咪行為需搭配前後情境觀察，健康疑慮請諮詢獸醫師。</div></div>
+      <button id="again" class="soft">↻ 再分析一次</button>
+    </div>
+  </section>
+</div>
+</div>
+
+<script>
+const FEATURES = [
+  {id:'plane_ears', label:'👂 飛機耳', hint:'耳朵往兩側展開', scores:{alert:26, irritated:24}, obs:'耳朵向兩側展開，通常代表壓力、煩躁或防禦。'},
+  {id:'ears_back', label:'😾 耳朵後壓', hint:'明顯往後貼', scores:{alert:22, irritated:22}, obs:'耳朵明顯向後壓，是常見的警戒或不悅訊號。'},
+  {id:'dilated', label:'👁 瞳孔放大', hint:'眼睛睜大', scores:{alert:18, interactive:8}, obs:'瞳孔放大可能與緊張、興奮或高喚醒狀態有關。'},
+  {id:'open_mouth', label:'😮 張嘴', hint:'嘴巴張開', scores:{alert:14, irritated:12}, obs:'張嘴本身提高喚醒程度，需搭配其他訊號一起看。'},
+  {id:'hiss', label:'💨 哈氣', hint:'明顯威嚇', scores:{alert:40, irritated:34}, obs:'哈氣是非常明確的警告行為，代表牠需要距離。'},
+  {id:'teeth', label:'🦷 露牙', hint:'看得到牙齒', scores:{alert:32, irritated:24}, obs:'露牙通常代表防禦、威嚇或高度不舒服。'},
+  {id:'puffed', label:'🐈 炸毛', hint:'毛髮蓬起', scores:{alert:30, irritated:10}, obs:'炸毛代表壓力升高，身體處於自我保護狀態。'},
+  {id:'tail_swish', label:'〰️ 甩尾', hint:'尾巴快速甩動', scores:{irritated:24, alert:10}, obs:'快速甩尾常與不耐煩或刺激累積有關。'},
+  {id:'hiding', label:'🙈 躲藏', hint:'靠牆、躲角落', scores:{alert:24}, obs:'躲藏通常代表牠正在增加安全感、避免刺激。'},
+  {id:'slow_blink', label:'😽 慢眨眼', hint:'柔和瞇眼', scores:{relaxed:28, interactive:18}, obs:'慢眨眼多半是比較放鬆、友善的訊號。'},
+  {id:'loose', label:'💤 身體放鬆', hint:'姿勢鬆弛', scores:{relaxed:34}, obs:'身體鬆弛通常代表環境讓牠感到相對安全。'},
+  {id:'belly', label:'🫶 露肚肚', hint:'翻肚或側躺', scores:{relaxed:18, interactive:10}, obs:'露肚或側躺常反映放鬆，但不一定等於願意被摸。'},
+  {id:'rub', label:'🐾 蹭人', hint:'主動靠近磨蹭', scores:{interactive:26, relaxed:10}, obs:'主動蹭人代表牠想互動，或正在做氣味標記。'},
+  {id:'approach', label:'🚶 主動靠近', hint:'往人靠近', scores:{interactive:24}, obs:'主動靠近通常表示好奇、期待互動或尋求資源。'},
+  {id:'play', label:'🎣 撲抓玩耍', hint:'準備撲跳', scores:{interactive:28, alert:8}, obs:'撲抓與凝視移動物體，常見於玩耍或狩獵模式。'},
+  {id:'meow', label:'📣 一直叫', hint:'發出叫聲', scores:{food:20, interactive:12}, obs:'頻繁叫聲可能與討關注、討食或環境需求有關。'},
+  {id:'bowl', label:'🍚 盯著飯碗', hint:'注意食物區域', scores:{food:34}, obs:'注意力集中在食物區域時，多半與進食期待有關。'},
+  {id:'sleepy', label:'😴 想睡覺', hint:'半瞇眼、想睡', scores:{relaxed:22}, obs:'想睡或昏昏欲睡時，多半是低喚醒、偏放鬆狀態。'}
+];
+
+const CONTEXTS = [
+  {id:'ctx_touch', label:'🙋 剛剛被摸', scores:{irritated:10}},
+  {id:'ctx_new', label:'🏠 陌生環境', scores:{alert:16}},
+  {id:'ctx_other_cat', label:'🐱 附近有其他貓', scores:{alert:12, irritated:8}},
+  {id:'ctx_hospital', label:'🧳 剛到醫院', scores:{alert:18}},
+  {id:'ctx_just_ate', label:'🍽 剛吃完飯', scores:{food:-10, relaxed:8}},
+  {id:'ctx_played', label:'🪀 剛玩完', scores:{interactive:10, relaxed:6}}
+];
+
+const MOODS = {
+  angry:{
+    title:'高度警戒／防禦中',
+    cute:'我現在真的沒有要交朋友，請退後三步。',
+    serious:'我目前可能處於高度警戒狀態，需要距離與安全感。',
+    savage:'我耳朵都壓成這樣了，你還要問我心情？',
+    guide:'先停止靠近、撫摸或抱牠，降低聲音與刺激，保留退路與安全空間。'
+  },
+  irritated:{
+    title:'有點不耐煩',
+    cute:'今天的摸摸額度已用完，請明日再來。',
+    serious:'我可能需要暫停觸摸，並保留一些距離。',
+    savage:'手收回去，這次是提醒，下次是教育。',
+    guide:'先停止撫摸，等牠主動靠近、身體放鬆後再互動。'
+  },
+  alert:{
+    title:'警戒觀察中',
+    cute:'我先看看這裡安不安全，再決定要不要賞你面子。',
+    serious:'我可能正在觀察環境，需要更多時間與安全感。',
+    savage:'先不要跟我靠太近，我還在做風險評估。',
+    guide:'降低干擾與噪音，提供躲藏處，不要強迫牠立刻互動。'
+  },
+  food:{
+    title:'期待食物中',
+    cute:'我不是餓，我只是覺得這餐份量可以再談。',
+    serious:'我可能正在期待食物或希望你注意我。',
+    savage:'碗是有底的，你的愛不應該有底。',
+    guide:'先確認正常餵食量與飲水，再判斷是不是單純討關注。'
+  },
+  play:{
+    title:'想互動／玩耍',
+    cute:'剛剛那局不算，再來一輪！',
+    serious:'我可能處於較高的互動或玩耍意願狀態。',
+    savage:'逗貓棒拿好，第二回合開始。',
+    guide:'可以安排短時間互動，並留意是否已經玩到太亢奮。'
+  },
+  relaxed:{
+    title:'放鬆想休息',
+    cute:'我現在很忙，忙著睡覺。',
+    serious:'我看起來比較放鬆，現在可能想休息。',
+    savage:'不要一直叫我，我又沒有欠你 KPI。',
+    guide:'讓牠安靜休息即可，不需要刻意打擾。'
+  },
+  default:{
+    title:'正在觀察你',
+    cute:'我有我的想法，但我暫時不打算告訴你。',
+    serious:'目前訊號不算強烈，建議搭配前後情境觀察。',
+    savage:'你拍你的，我判斷要不要理你。',
+    guide:'若想提高判讀準確度，可以再補充更多可見特徵。'
+  }
+};
+
+const featureGrid = document.getElementById('featureGrid');
+const contextGrid = document.getElementById('contextGrid');
+FEATURES.forEach(f=>{
+  const btn=document.createElement('button');
+  btn.className='feature'; btn.dataset.id=f.id;
+  btn.innerHTML=`${f.label}<small>${f.hint}</small>`;
+  btn.onclick=()=>btn.classList.toggle('active');
+  featureGrid.appendChild(btn);
+});
+CONTEXTS.forEach(c=>{
+  const btn=document.createElement('button');
+  btn.className='context'; btn.dataset.id=c.id; btn.textContent=c.label;
+  btn.onclick=()=>btn.classList.toggle('active');
+  contextGrid.appendChild(btn);
+});
+
+const file=document.getElementById('file'),preview=document.getElementById('preview'),placeholder=document.getElementById('placeholder');
+const empty=document.getElementById('empty'),loader=document.getElementById('loader'),results=document.getElementById('results');
+let hasImage=false,active=null;
+file.addEventListener('change',e=>{
+  const f=e.target.files?.[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{preview.src=r.result;preview.style.display='block';placeholder.style.display='none';hasImage=true};
+  r.readAsDataURL(f);
+});
+document.getElementById('clear').onclick=()=>{
+  preview.removeAttribute('src'); preview.style.display='none'; placeholder.style.display='block'; file.value=''; hasImage=false;
+  results.style.display='none'; empty.style.display='flex';
+  document.querySelectorAll('.feature.active,.context.active').forEach(x=>x.classList.remove('active'));
+  document.getElementById('contextText').value='';
+};
+
+function getSelectedFeatures(){ return FEATURES.filter(f=>document.querySelector(`.feature[data-id="${f.id}"]`).classList.contains('active')); }
+function getSelectedContexts(){ return CONTEXTS.filter(c=>document.querySelector(`.context[data-id="${c.id}"]`).classList.contains('active')); }
+
+function analyzeScores(){
+  const base = {relaxed:8, interactive:8, alert:8, irritated:8, food:8};
+  const features = getSelectedFeatures();
+  const contexts = getSelectedContexts();
+  features.forEach(f=>{
+    Object.entries(f.scores).forEach(([k,v])=>base[k]=(base[k]||0)+v);
+  });
+  contexts.forEach(c=>{
+    Object.entries(c.scores).forEach(([k,v])=>base[k]=(base[k]||0)+v);
+  });
+
+  const extra = document.getElementById('contextText').value;
+  if(/哈氣|生氣|露牙|咬|攻擊|炸毛|兇/.test(extra)){ base.alert += 20; base.irritated += 18; }
+  if(/摸|拍|抱/.test(extra)){ base.irritated += 10; }
+  if(/罐頭|飯|餓|吃/.test(extra)){ base.food += 14; }
+  if(/睡|睏/.test(extra)){ base.relaxed += 10; }
+  if(/玩|逗貓棒|追/.test(extra)){ base.interactive += 12; }
+
+  Object.keys(base).forEach(k=>base[k]=Math.max(0,Math.min(100,Math.round(base[k]))));
+  return base;
+}
+
+function chooseMood(scores, featureCount){
+  const ranked = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const [topKey, topScore] = ranked[0];
+  const secondScore = ranked[1][1];
+  if((scores.alert>=75 && scores.irritated>=65) || (scores.alert>=85)) return 'angry';
+  if(scores.irritated>=60 && scores.irritated>=scores.alert-5) return 'irritated';
+  if(scores.food>=60) return 'food';
+  if(scores.interactive>=60 && scores.interactive>=scores.relaxed) return 'play';
+  if(scores.relaxed>=62) return 'relaxed';
+  if(scores.alert>=52) return 'alert';
+  if(featureCount===0) return 'default';
+  return topKey==='interactive'?'play':(topKey==='relaxed'?'relaxed':(topKey==='food'?'food':(topKey==='alert'?'alert':(topKey==='irritated'?'irritated':'default'))));
+}
+
+function confidenceLabel(featureCount, scores){
+  const ranked = Object.values(scores).sort((a,b)=>b-a);
+  const gap = ranked[0]-ranked[1];
+  if(featureCount>=4 && gap>=14) return '高';
+  if(featureCount>=2) return '中';
+  return '低～中';
+}
+
+function interpretation(moodKey, pickedLabels){
+  const joined = pickedLabels.join('、') || '目前勾選的特徵';
+  switch(moodKey){
+    case 'angry': return `根據你勾選的 ${joined}，這些訊號同時把「警戒」與「不耐煩」分數大幅拉高，因此整體更接近高度防禦或明確要求距離的狀態。`;
+    case 'irritated': return `從 ${joined} 來看，牠比較像是刺激正在累積、耐心下降，還沒有到最強烈威嚇，但已經在提醒你「先停一下」。`;
+    case 'alert': return `你標記的 ${joined} 讓「警戒」分數高於其他情緒，代表牠目前更像是在評估環境或對刺激保持注意。`;
+    case 'food': return `你勾選的 ${joined} 讓「想吃」分數明顯上升，整體較像是在期待食物、討關注或和資源有關的狀態。`;
+    case 'play': return `從 ${joined} 判斷，牠現在偏向互動或玩耍模式，身體與注意力都可能維持在較高興奮度。`;
+    case 'relaxed': return `你勾選的 ${joined} 多半屬於低壓、較放鬆的訊號，因此整體結果更接近安心休息。`;
+    default: return `目前特徵訊號不算集中，還不足以非常明確地指向單一情緒。`;
+  }
+}
+
+function buildGuide(moodKey){ return MOODS[moodKey]?.guide || MOODS.default.guide; }
+
+function render(){
+  const selectedFeatures = getSelectedFeatures();
+  const selectedContexts = getSelectedContexts();
+  const scores = analyzeScores();
+  const moodKey = chooseMood(scores, selectedFeatures.length);
+  const conf = confidenceLabel(selectedFeatures.length, scores);
+  const mood = MOODS[moodKey] || MOODS.default;
+  active = mood;
+
+  document.getElementById('moodName').textContent = mood.title;
+  document.getElementById('conf').textContent = '判讀信心：' + conf;
+
+  [scores.relaxed, scores.interactive, scores.alert, scores.irritated, scores.food].forEach((v,i)=>{
+    document.getElementById('b'+i).style.width = v + '%';
+    document.getElementById('v'+i).textContent = v;
+  });
+
+  document.getElementById('pickedFeatures').textContent =
+    selectedFeatures.length ? selectedFeatures.map(f=>f.label.replace(/^[^\s]+ /,'')).join('、') : '尚未勾選特徵';
+  document.getElementById('calcExplain').textContent =
+    `共套用 ${selectedFeatures.length} 個肢體特徵與 ${selectedContexts.length} 個補充情境，將其權重加總後得到主要情緒。`;
+
+  const ul = document.getElementById('obs'); ul.innerHTML = '';
+  (selectedFeatures.length ? selectedFeatures.map(f=>f.obs) : ['目前沒有勾選任何肢體特徵，因此系統只能提供較保守的推測。']).forEach(text=>{
+    const li=document.createElement('li'); li.textContent=text; ul.appendChild(li);
+  });
+
+  document.getElementById('interp').textContent = interpretation(moodKey, selectedFeatures.map(f=>f.label.replace(/^[^\s]+ /,'')));
+  document.getElementById('os').textContent = '「' + mood.cute + '」';
+  document.getElementById('guide').textContent = buildGuide(moodKey);
+  document.querySelectorAll('.tone').forEach(x=>x.classList.toggle('active', x.dataset.tone==='cute'));
+}
+
+async function analyze(){
+  if(!hasImage){ alert('請先上傳一張貓咪照片。'); return; }
+  empty.style.display='none'; results.style.display='none'; loader.style.display='block';
+  ['s1','s2','s3','s4'].forEach(x=>document.getElementById(x).classList.remove('on'));
+  for(const id of ['s1','s2','s3','s4']){ await new Promise(r=>setTimeout(r,480)); document.getElementById(id).classList.add('on'); }
+  await new Promise(r=>setTimeout(r,350));
+  render();
+  loader.style.display='none'; results.style.display='flex';
+}
+document.getElementById('analyze').onclick=analyze;
+document.getElementById('again').onclick=analyze;
+document.querySelectorAll('.tone').forEach(btn=>btn.onclick=()=>{
+  if(!active) return;
+  document.querySelectorAll('.tone').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('os').textContent='「'+active[btn.dataset.tone]+'」';
+});
+
+// intro
+const intro=document.getElementById('intro'),video=document.getElementById('introVideo');
+function enter(){ try{video.pause();}catch(e){} intro.classList.add('hide'); document.body.classList.remove('intro-lock'); setTimeout(()=>intro.remove(),700); }
+document.getElementById('introSkip').onclick=enter;
+document.getElementById('introPlay').onclick=async()=>{
+  try{
+    video.currentTime=0; video.muted=false; video.volume=1; await video.play();
+    document.getElementById('introPlay').style.display='none';
+    document.getElementById('introHint').textContent='🎵 開場動畫播放中…';
+  }catch(e){
+    document.getElementById('introHint').textContent='瀏覽器阻擋播放，請再點一次。';
+  }
+};
+video.addEventListener('ended',enter);
+</script>
+</body>
+</html>
